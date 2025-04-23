@@ -31,7 +31,7 @@ export class TerminalDebugTracker implements vscode.DebugAdapterTracker {
 
   constructor(session: vscode.DebugSession) {
     this.session = session;
-}
+  }
   private writeMessages(messages: any[]): boolean {
     const composeText = (message: any): string => {
       if (!message.body) {
@@ -41,12 +41,12 @@ export class TerminalDebugTracker implements vscode.DebugAdapterTracker {
       const color = message.body.category === 'stdout' ? '\x1b[34m' : message.body.category === 'stderr' ? '\x1b[31m' : '\x1b[33m';
       const lineNumber = ++this.lineNumber;
       if (message.body.source) {
-        this.linkMap.set(lineNumber, { startIndex: 0, length: 2 + lineNumber.toString().length, tooltip: `${message.body.source?.name}:${message.body.line}:${message.body.column} (${message.body.category})`, sourcePath: message.body.source.path, line: message.body.line, column: message.body.column});
+        this.linkMap.set(lineNumber, { startIndex: 0, length: 2 + lineNumber.toString().length, tooltip: `${message.body.source?.name}:${message.body.line}:${message.body.column} (${message.body.category})`, sourcePath: message.body.source.path, line: message.body.line, column: message.body.column });
         return `${color}[${lineNumber}] ${output}${color ? '\x1b[0m' : ''}`;
       }
-      return `${color}(${lineNumber}) ${output}${color ? '\x1b[0m' : ''}`;
+      return `${color}${output}${color ? '\x1b[0m' : ''}`;
     };
-    
+
     if (!this.pty) {
       return false;
     }
@@ -71,8 +71,8 @@ export class TerminalDebugTracker implements vscode.DebugAdapterTracker {
     if (message.type === 'event' && message.event === 'output' && ['stdout', 'stderr', 'console', 'important'].includes(message.body?.category)) {
       this.queuedMessages.push(message);
       if (!this.timeout) {
-        this.timeout= setTimeout(async () => {
-          const messages = [ ...this.queuedMessages ];
+        this.timeout = setTimeout(async () => {
+          const messages = [...this.queuedMessages];
           this.queuedMessages = [];
           this.timeout = undefined;
           if (!TerminalDebugTracker.ourViewColumn && ourFirstTerminalName) {
@@ -109,7 +109,7 @@ export class TerminalDebugTracker implements vscode.DebugAdapterTracker {
             messages.unshift(`Debug session ${this.session.name} (${this.session.type}) [${new Date().toLocaleString()}]`);
             // Requeue messages and return, giving time for the terminal to be ready.
             // The initial messages will be written when timeout happens after the next incoming message
-            this.queuedMessages = [ ...messages ];
+            this.queuedMessages = [...messages];
             return;
           }
 
@@ -120,10 +120,10 @@ export class TerminalDebugTracker implements vscode.DebugAdapterTracker {
           }
           else {
             console.log(`Failed to append ${messages.length} messages`);
-            this.queuedMessages = [ ...messages, ...this.queuedMessages ];
+            this.queuedMessages = [...messages, ...this.queuedMessages];
           }
         },
-        50
+          50
         );
       }
       //console.log(`**${outcome}: (${message.body.category}) from ${this.session.type} session ${this.session.name}: ${message.body.output} [${message.body.source.name}:${message.body.line}:${message.body.column}]`);
